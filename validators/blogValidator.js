@@ -1,6 +1,6 @@
 const { body } = require("express-validator");
 
-const blogValidator = [
+const validateBlog = [
   body("title")
     .notEmpty()
     .withMessage("Title is required")
@@ -38,4 +38,4 @@ const blogValidator = [
     .withMessage("Comments must be an array of comment objects"),
 ];
 
-module.exports = blogValidator;
+module.exports = { validateBlog };
