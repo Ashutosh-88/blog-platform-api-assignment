@@ -5,7 +5,6 @@ const {
   validateLogin,
 } = require("../validators/userValidator");
 const { handleValidationErrors } = require("../middleware/validationHandler");
-const { validate } = require("../models/User");
 
 const router = express.Router();
 
