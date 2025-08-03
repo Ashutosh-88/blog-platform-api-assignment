@@ -213,7 +213,7 @@ blog-platform-api/
 │   ├── blogRoutes.js        # Blog and comment routes
 │   └── userRoutes.js        # User routes
 ├── utils/
-│   ├── appError.js          # Custom error class
+│   ├── AppError.js          # Custom error class
 │   └── catchAsync.js        # Async error handling utility
 ├── validators/
 │   ├── blogValidator.js     # Blog validation rules
