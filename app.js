@@ -5,8 +5,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const authRoutes = require("./routes/authRoutes");
 const blogRoutes = require("./routes/blogRoutes");
-// const commentRoutes = require("./routes/commentRoutes");
-// const userRoutes = require("./routes/userRoutes");
+const userRoutes = require("./routes/userRoutes");
 const errorHandler = require("./middleware/errorHandler");
 const connectDB = require("./config/database");
 
@@ -21,8 +20,7 @@ app.use(express.json());
 app.get("/", (req, res) => res.send("API is Working"));
 app.use("/api/auth", authRoutes);
 app.use("/api/blogs", blogRoutes);
-// app.use("/api/comments", commentRoutes);
-// app.use("/api/users", userRoutes);
+app.use("/api/users", userRoutes);
 
 // Global error handling middleware
 app.use(errorHandler);
