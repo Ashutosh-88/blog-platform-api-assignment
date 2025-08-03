@@ -5,19 +5,28 @@ const AppError = require("../utils/AppError");
 
 // Add a comment to a blog post
 exports.addComment = catchAsync(async (req, res, next) => {
-  const { blogId } = req.params;
   const { text } = req.body;
+  const { blogId } = req.params;
 
+  // Check if blog exists
   const blog = await Blog.findById(blogId);
   if (!blog) {
     return next(new AppError("Blog not found", 404));
   }
 
+  // Create the comment
   const comment = await Comment.create({
     text,
     blog: blogId,
     user: req.user.id,
   });
+
+  // Add comment to blog's comments array
+  blog.comments.push(comment._id);
+  await blog.save();
+
+  // Populate user data for response
+  await comment.populate("user", "username email");
 
   res.status(201).json({
     success: true,
@@ -29,37 +38,43 @@ exports.addComment = catchAsync(async (req, res, next) => {
 exports.getComments = catchAsync(async (req, res, next) => {
   const { blogId } = req.params;
 
-  const comments = await Comment.find({ blog: blogId }).populate(
-    "user",
-    "name email"
-  );
+  // Check if blog exists
+  const blog = await Blog.findById(blogId);
+  if (!blog) {
+    return next(new AppError("Blog not found", 404));
+  }
+
+  const comments = await Comment.find({ blog: blogId })
+    .populate("user", "username email")
+    .sort({ createdAt: -1 });
 
   res.status(200).json({
     success: true,
+    count: comments.length,
     data: comments,
   });
 });
 
 // Delete a comment
 exports.deleteComment = catchAsync(async (req, res, next) => {
-  const { blogId, commentId } = req.params;
+  const { commentId, blogId } = req.params;
 
-  // Find the comment and verify it belongs to the specified blog
-  const comment = await Comment.findOne({ _id: commentId, blog: blogId });
-
+  const comment = await Comment.findById(commentId);
   if (!comment) {
-    return next(
-      new AppError("Comment not found or does not belong to this blog", 404)
-    );
+    return next(new AppError("Comment not found", 404));
   }
 
-  // Check if the user is the author of the comment
+  // Check if user owns the comment
   if (comment.user.toString() !== req.user.id) {
-    return next(
-      new AppError("You are not authorized to delete this comment", 403)
-    );
+    return next(new AppError("You can only delete your own comments", 403));
   }
 
+  // Remove comment from blog's comments array
+  await Blog.findByIdAndUpdate(blogId, {
+    $pull: { comments: commentId },
+  });
+
+  // Delete the comment
   await Comment.findByIdAndDelete(commentId);
 
   res.status(204).json({
