@@ -22,6 +22,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/users", userRoutes);
 
+// Handle undefined routes (404 errors)
+app.all("*", (req, res, next) => {
+  const err = new Error(`Route ${req.originalUrl} not found`);
+  err.status = 404;
+  next(err);
+});
+
 // Global error handling middleware
 app.use(errorHandler);
 
